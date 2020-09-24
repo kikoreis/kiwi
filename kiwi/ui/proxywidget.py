@@ -29,7 +29,6 @@
 import base64
 import gettext
 import logging
-import six
 
 from gi.repository import Gtk, GObject, GdkPixbuf
 
@@ -108,7 +107,7 @@ class ProxyWidgetMixin(object):
             return None
 
         if data_type == 'unicode':
-            data_type = six.text_type
+            data_type = str
 
         # This may convert from string to type,
         # A type object will always be returned

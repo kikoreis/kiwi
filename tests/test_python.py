@@ -86,13 +86,6 @@ class AttributeForwarderTest(unittest.TestCase):
 class StripAccentsTest(unittest.TestCase):
     def testStripAccents(self):
         for string, string_without_accentuation in [
-            # bytes
-            ('áâãäåāăąàÁÂÃÄÅĀĂĄÀ'.encode(), b'aaaaaaaaaAAAAAAAAA'),
-            ('èééêëēĕėęěĒĔĖĘĚ'.encode(), b'eeeeeeeeeeEEEEE'),
-            ('ìíîïìĩīĭÌÍÎÏÌĨĪĬ'.encode(), b'iiiiiiiiIIIIIIII'),
-            ('óôõöōŏőÒÓÔÕÖŌŎŐ'.encode(), b'oooooooOOOOOOOO'),
-            ('ùúûüũūŭůÙÚÛÜŨŪŬŮ'.encode(), b'uuuuuuuuUUUUUUUU'),
-            ('çÇ'.encode(), b'cC'),
             # strings
             ('áâãäåāăąàÁÂÃÄÅĀĂĄÀ', 'aaaaaaaaaAAAAAAAAA'),
             ('èééêëēĕėęěĒĔĖĘĚ', 'eeeeeeeeeeEEEEE'),

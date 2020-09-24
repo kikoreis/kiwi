@@ -57,7 +57,7 @@ class MagicWindowWrapper(object):
         self.window.emit('delete-event', Gdk.Event.new(Gdk.DELETE))
 
     def __getattr__(self, attr):
-        if not attr in self.ns:
+        if attr not in self.ns:
             raise MissingWidget(attr)
         return self.ns[attr]
 
@@ -167,7 +167,7 @@ class Runner(object):
             except MissingWidget as e:
                 raise SystemExit(
                     "ERROR: Could not find widget: %s" % str(e))
-            except Exception as e:
+            except Exception:
                 import traceback
                 traceback.print_exc()
 
@@ -220,7 +220,7 @@ class Runner(object):
         Wait to open an window.
         :param window_name:
         """
-        if not window_name in self._windows:
+        if window_name not in self._windows:
             raise NotReadyYet(window_name)
         return self._windows[window_name]
 
@@ -231,6 +231,7 @@ class Runner(object):
         """
         if window_name in self._windows:
             raise NotReadyYet(window_name)
+
 
 runner = None
 

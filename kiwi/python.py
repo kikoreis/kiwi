@@ -27,8 +27,6 @@ import unicodedata
 import sys
 import warnings
 
-import six
-
 __all__ = ['ClassInittableMetaType', 'ClassInittableObject']
 
 
@@ -39,8 +37,7 @@ class ClassInittableMetaType(type):
         self.__class_init__(namespace)
 
 
-@six.add_metaclass(ClassInittableMetaType)
-class ClassInittableObject(object):
+class ClassInittableObject(metaclass=ClassInittableMetaType):
     """
     I am an object which will call a classmethod called
     __class_init__ when I am created.
@@ -95,10 +92,8 @@ class AttributeForwarder(ClassInittableObject):
         if cls.__bases__ == (ClassInittableObject,):
             return
 
-        if not 'attributes' in ns:
-            raise TypeError(
-                "the class variable attributes needs to be set for %s" % (
-                    cls.__name__))
+        if 'attributes' not in ns:
+            raise TypeError("the class variable attributes needs to be set for %s" % (cls.__name__))
         if "target" in ns['attributes']:
             raise TypeError("'target' is a reserved attribute")
 
@@ -215,6 +210,7 @@ def slicerange(slice, limit):
 
     return range(*slice.indices(limit))
 
+
 _no_deprecation = False
 
 
@@ -241,8 +237,7 @@ def disabledeprecationcall(func, *args, **kwargs):
     return retval
 
 
-@six.add_metaclass(ClassInittableMetaType)
-class enum(int):
+class enum(int, metaclass=ClassInittableMetaType):
     """
     enum is an enumered type implementation in python.
 
@@ -272,7 +267,7 @@ class enum(int):
         Lookup an enum by value
         :param value: the value
         """
-        if not value in cls.values:
+        if value not in cls.values:
             raise ValueError("There is no enum for value %d" % (value,))
         return cls.values[value]
 
@@ -342,20 +337,6 @@ def strip_accents(string):
     :param string: a string, either in str or unicode format
     :returns: the string without accentuantion
     """
-    # FIXME: Probably no one should be using this with bytes.
-    if isinstance(string, six.binary_type):
-        # unicode don't need this
-        string = string.decode()
-        is_bytes = True
-    else:
-        is_bytes = False
-
     string = unicodedata.normalize('NFKD', string)
     string = string.encode('ASCII', 'ignore')
-
-    # After the encode above, the string would become a byte.
-    # Convert back to string if it was one before to keep the same type
-    if not is_bytes:
-        string = string.decode()
-
-    return string
+    return string.decode()

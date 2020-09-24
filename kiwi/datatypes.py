@@ -44,7 +44,7 @@ import locale
 import re
 import sys
 import time
-import six
+from functools import partial
 
 from kiwi import ValueUnset
 from kiwi.enums import Alignment
@@ -66,7 +66,7 @@ if sys.platform == 'win32':
 
 __all__ = ['ValidationError', 'lformat', 'converter']
 
-_ = lambda m: gettext.dgettext('kiwi', m)
+_ = partial(gettext.dgettext, 'kiwi')
 
 number = (int, float, decimal.Decimal)
 
@@ -105,14 +105,14 @@ class ConverterRegistry:
             raise TypeError("converter_type must be a BaseConverter subclass")
 
         ctype = converter_type.type
-        if not ctype in self._converters:
+        if ctype not in self._converters:
             raise KeyError(converter_type)
 
         del self._converters[ctype]
 
     def get_converter(self, converter_type):
         if converter_type == 'unicode':
-            converter_type = six.text_type
+            converter_type = str
 
         try:
             converter = self._converters[converter_type]
@@ -120,8 +120,7 @@ class ConverterRegistry:
             # This is a hack:
             # If we're a subclass of enum, create a dynamic subclass on the
             # fly and register it, it's necessary for enum.from_string to work.
-            if (issubclass(converter_type, enum) and
-                    not converter_type in self._converters):
+            if (issubclass(converter_type, enum) and converter_type not in self._converters):
                 return self.add(
                     type(enum.__class__.__name__ + 'EnumConverter',
                          (_EnumConverter,), dict(type=converter_type)))
@@ -191,6 +190,7 @@ class ConverterRegistry:
             if c.type.__name__ == value:
                 return c.type
 
+
 # Global converter, can be accessed from outside
 converter = ConverterRegistry()
 
@@ -239,7 +239,7 @@ class BaseConverter(object):
 
 
 class _BytesConverter(BaseConverter):
-    type = six.binary_type
+    type = bytes
     name = _('Bytes')
 
     def as_string(self, value, format=None):
@@ -248,13 +248,14 @@ class _BytesConverter(BaseConverter):
         return ''.join(chr(i) for i in value)
 
     def from_string(self, value):
-        return six.binary_type(ord(i) for i in value)
+        return bytes(ord(i) for i in value)
+
 
 converter.add(_BytesConverter)
 
 
 class _StringConverter(BaseConverter):
-    type = six.text_type
+    type = str
     name = _('String')
 
     def as_string(self, value, format=None):
@@ -265,7 +266,8 @@ class _StringConverter(BaseConverter):
     def from_string(self, value):
         if isinstance(value, bytes):
             value = value.decode('utf-8')
-        return six.text_type(value)
+        return str(value)
+
 
 converter.add(_StringConverter)
 
@@ -294,8 +296,8 @@ class _IntConverter(BaseConverter):
         try:
             return self.type(value)
         except ValueError:
-            raise ValidationError(
-                _("%s could not be converted to an integer") % value)
+            raise ValidationError(_("%s could not be converted to an integer") % value)
+
 
 converter.add(_IntConverter)
 
@@ -305,7 +307,7 @@ class _BoolConverter(BaseConverter):
     name = _('Boolean')
 
     def as_string(self, value, format=None):
-        return six.text_type(value)
+        return str(value)
 
     def from_string(self, value):
         "Convert a string to a boolean"
@@ -317,8 +319,8 @@ class _BoolConverter(BaseConverter):
         elif value.upper() in ('FALSE', '0'):
             return False
 
-        return ValidationError(
-            _("'%s' can not be converted to a boolean") % value)
+        return ValidationError(_("'%s' can not be converted to a boolean") % value)
+
 
 converter.add(_BoolConverter)
 
@@ -368,10 +370,10 @@ class _FloatConverter(BaseConverter):
         try:
             retval = float(value)
         except ValueError:
-            raise ValidationError(_("This field requires a number, not %r") %
-                                  value)
+            raise ValidationError(_("This field requires a number, not %r") % value)
 
         return retval
+
 
 converter.add(_FloatConverter)
 
@@ -391,10 +393,10 @@ class _DecimalConverter(_FloatConverter):
         try:
             retval = decimal.Decimal(value)
         except decimal.InvalidOperation:
-            raise ValidationError(_("This field requires a number, not %r") %
-                                  value)
+            raise ValidationError(_("This field requires a number, not %r") % value)
 
         return retval
+
 
 converter.add(_DecimalConverter)
 
@@ -582,6 +584,7 @@ class _TimeConverter(_BaseDateTimeConverter):
         # hour, minute, second
         return datetime.time(*dateinfo[3:6])
 
+
 converter.add(_TimeConverter)
 
 
@@ -599,6 +602,7 @@ class _DateTimeConverter(_BaseDateTimeConverter):
     def from_dateinfo(self, dateinfo):
         # year, month, day, hour, minute, second
         return datetime.datetime(*dateinfo[:6])
+
 
 converter.add(_DateTimeConverter)
 
@@ -618,6 +622,7 @@ class _DateConverter(_BaseDateTimeConverter):
         # year, month, day
         return datetime.date(*dateinfo[:3])
 
+
 converter.add(_DateConverter)
 
 
@@ -628,6 +633,7 @@ class _ObjectConverter(BaseConverter):
     as_string = None
     from_string = None
 
+
 converter.add(_ObjectConverter)
 
 
@@ -637,17 +643,15 @@ class _EnumConverter(BaseConverter):
 
     def as_string(self, value, format=None):
         if not isinstance(value, self.type):
-            raise ValidationError(
-                "value must be an instance of %s, not %r" % (
-                    self.type, value))
+            raise ValidationError("value must be an instance of %s, not %r" % (self.type, value))
         return value.name
 
     def from_string(self, value):
         names = self.type.names
-        if not value in names:
-            raise ValidationError(
-                "Invalid value %s for enum %s" % (value, self.type))
+        if value not in names:
+            raise ValidationError("Invalid value %s for enum %s" % (value, self.type))
         return names[value]
+
 
 converter.add(_EnumConverter)
 

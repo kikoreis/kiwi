@@ -25,8 +25,7 @@ from kiwi import kiwi_version
 from kiwi.dist import setup, listfiles, listpackages
 
 
-pixmaps = listfiles('data', 'kiwiwidgets',
-                    'glade-plugin', 'resources', 'kiwiwidgets', '*.png')
+pixmaps = listfiles('data', 'kiwiwidgets', 'glade-plugin', 'resources', 'kiwiwidgets', '*.png')
 
 # When uploading to pypi or building a wheel or an egg
 if 'upload' in sys.argv or 'bdist_wheel' in sys.argv or 'bdist_egg' in sys.argv:
@@ -35,17 +34,17 @@ else:
     name = 'kiwi'
 
 with open('requirements.txt') as f:
-    install_requires = [l.strip() for l in f.readlines() if
-                        l.strip() and not l.startswith('#')]
+    install_requires = [line.strip() for line in f.readlines() if
+                        line.strip() and not line.startswith('#')]
 
 setup(name=name,
       packagename='kiwi',
       version=".".join(map(str, kiwi_version)),
       description="A framework and a set of enhanced widgets based on PyGTK",
       long_description=__doc__,
-      author="Async Open Source",
-      author_email="kiwi@async.com.br",
-      url="http://www.async.com.br/projects/kiwi/",
+      author="Stoq Tecnologia",
+      author_email="dev@stoq.com.br",
+      url="https://github.com/stoq/kiwi",
       license="GNU LGPL 2.1 (see COPYING)",
       data_files=[
           # Data
@@ -55,16 +54,11 @@ setup(name=name,
           ('$libdir/glade3/modules', ['data/kiwiwidgets/kiwiwidgets.py']),
           ('share/glade3/pixmaps', pixmaps),
           # Documentation
-          ('share/doc/kiwi',
-           ('AUTHORS', 'NEWS', 'README')),
-          ('share/doc/kiwi/howto',
-           listfiles('doc/howto/', '*')),
-          ('share/doc/kiwi/api',
-           listfiles('doc/api/', '*')),
+          ('share/doc/kiwi', ('AUTHORS', 'NEWS', 'README')),
+          ('share/doc/kiwi/howto', listfiles('doc/howto/', '*')),
+          ('share/doc/kiwi/api', listfiles('doc/api/', '*')),
       ],
-      scripts=['bin/kiwi-i18n',
-               'bin/kiwi-ui-test'],
+      scripts=['bin/kiwi-i18n', 'bin/kiwi-ui-test'],
       packages=listpackages('kiwi'),
-      test_requires=['mock'],
       install_requires=install_requires,
       )

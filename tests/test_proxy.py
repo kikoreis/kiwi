@@ -3,7 +3,7 @@
 import unittest
 
 from gi.repository import GdkPixbuf
-import mock
+from unittest import mock
 
 from kiwi import ValueUnset
 from kiwi.datatypes import ValidationError

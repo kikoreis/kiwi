@@ -27,14 +27,14 @@
 """High level wrapper for GtkTreeView"""
 
 
+import collections
 import datetime
 import decimal
-import collections
 import gettext
 import locale
 import logging
 import pickle
-import six
+from functools import partial
 
 from gi.repository import Gtk, GLib, GObject, Gdk, Pango, GdkPixbuf
 
@@ -48,7 +48,7 @@ from kiwi.utils import gsignal, type_register
 from kiwi.ui.widgets.contextmenu import ContextMenu
 from kiwi.ui.cellrenderer import EditableTextRenderer, EditableSpinRenderer
 
-_ = lambda m: gettext.dgettext('kiwi', m)
+_ = partial(gettext.dgettext, 'kiwi')
 
 log = logging.getLogger('objectlist')
 
@@ -278,7 +278,7 @@ class Column(GObject.GObject):
         # It makes sense to set the default ellipsize to end if we have
         # a column which expands so it doesn't end up using more space
         # than there is available
-        if not 'ellipsize' in kwargs and self.expand:
+        if 'ellipsize' not in kwargs and self.expand:
             self.ellipsize = Pango.EllipsizeMode.END
 
     def __repr__(self):
@@ -457,9 +457,7 @@ class Column(GObject.GObject):
             renderer.connect('edited', self._on_renderer_spin__edited,
                              model, self, self.from_string)
             prop = 'text'
-        elif issubclass(data_type, (datetime.date, datetime.time,
-                                    six.string_types, number,
-                                    currency)):
+        elif issubclass(data_type, (datetime.date, datetime.time, str, number, currency)):
             if self.use_markup:
                 prop = 'markup'
             else:
@@ -1010,7 +1008,7 @@ class ObjectList(Gtk.Box):
                 "mode must be an Gtk.SelectionMode enum, not %r" % (mode,))
         # Gtk.SelectionMode.EXTENDED & Gtk.SelectionMode.MULTIPLE are both 3.
         # so we can't do this check.
-        #elif mode == Gtk.SelectionMode.EXTENDED:
+        # elif mode == Gtk.SelectionMode.EXTENDED:
         #    raise TypeError("Gtk.SelectionMode.EXTENDED is deprecated")
 
         self._sortable = sortable
@@ -1306,7 +1304,7 @@ class ObjectList(Gtk.Box):
                 objid = instance
                 # If the instance is not in the list insert it after
                 # the previous inserted object
-                if not objid in iters:
+                if objid not in iters:
                     if prev is None:
                         prev = self._model_append(instance)
                     else:
@@ -1404,7 +1402,7 @@ class ObjectList(Gtk.Box):
             self._model.set_sort_column_id(index, column.order)
 
         if column.searchable:
-            if not issubclass(column.data_type, six.string_types):
+            if not issubclass(column.data_type, str):
                 raise TypeError("Unsupported data type for "
                                 "searchable column: %s" % column.data_type)
             self._treeview.set_search_column(index)
@@ -1666,7 +1664,7 @@ class ObjectList(Gtk.Box):
         if not isinstance(column, Column):
             raise TypeError
 
-        if not column in self._columns:
+        if column not in self._columns:
             raise ValueError
 
         return column.treeview_column
@@ -1763,7 +1761,7 @@ class ObjectList(Gtk.Box):
         """
 
         objid = instance
-        if not objid in self._iters:
+        if objid not in self._iters:
             raise ValueError("instance %r is not in the list" % instance)
 
         if select:
@@ -1777,7 +1775,7 @@ class ObjectList(Gtk.Box):
 
     def update(self, instance):
         objid = instance
-        if not objid in self._iters:
+        if objid not in self._iters:
             raise ValueError("instance %r is not in the list" % instance)
         treeiter = self._iters[objid]
         self._model.row_changed(self._model[treeiter].path, treeiter)
@@ -1842,15 +1840,14 @@ class ObjectList(Gtk.Box):
         if selection.get_mode() == Gtk.SelectionMode.NONE:
             raise TypeError("Selection not allowed")
 
-        if (selection.get_mode() != Gtk.SelectionMode.MULTIPLE and
-                len(instances) > 1):
+        if (selection.get_mode() != Gtk.SelectionMode.MULTIPLE and len(instances) > 1):
             raise TypeError("You can only select multiple items with"
                             "selection mode set to Gtk.SelectionMode.MULTIPLE")
 
         # FIXME: This is not working for multiple selections. Only the last item
         # in the list remains selected
         for instance in instances:
-            if not instance in self._iters:
+            if instance not in self._iters:
                 raise ValueError("instance %s is not in the list" % repr(instance))
 
             treeiter = self._iters[instance]
@@ -1914,8 +1911,7 @@ class ObjectList(Gtk.Box):
             raise AssertionError
 
         # Skip emitting this
-        if (item is empty_marker or
-                isinstance(item, list) and empty_marker in item):
+        if (item is empty_marker or isinstance(item, list) and empty_marker in item):
             return
         self.emit('selection-changed', item)
 
@@ -1955,7 +1951,7 @@ class ObjectList(Gtk.Box):
         """
 
         objid = instance
-        if not objid in self._iters:
+        if objid not in self._iters:
             raise ValueError("instance %r is not in the list" % instance)
 
         treeiter = self._iters[objid]
@@ -1982,7 +1978,7 @@ class ObjectList(Gtk.Box):
         """
 
         objid = instance
-        if not objid in self._iters:
+        if objid not in self._iters:
             raise ValueError("instance %r is not in the list" % instance)
         treeiter = self._iters[objid]
 
@@ -2254,7 +2250,7 @@ class ObjectTree(ObjectList):
         immediate children
         """
         objid = instance
-        if not objid in self._iters:
+        if objid not in self._iters:
             raise ValueError("instance %r is not in the list" % instance)
         treeiter = self._iters[objid]
 
@@ -2268,7 +2264,7 @@ class ObjectTree(ObjectList):
         :param instance: an instance to collapse
         """
         objid = instance
-        if not objid in self._iters:
+        if objid not in self._iters:
             raise ValueError("instance %r is not in the list" % instance)
         treeiter = self._iters[objid]
 
@@ -2284,7 +2280,7 @@ class ObjectTree(ObjectList):
         if instance is None:
             return None
         objid = instance
-        if not objid in self._iters:
+        if objid not in self._iters:
             raise ValueError("instance %r is not in the list" % instance)
         treeiter = self._iters[objid]
         parentiter = self._model.iter_parent(treeiter)
@@ -2303,7 +2299,7 @@ class ObjectTree(ObjectList):
         if instance is None:
             return None
         objid = instance
-        if not objid in self._iters:
+        if objid not in self._iters:
             raise ValueError("instance %r is not in the list" % instance)
 
         instance_iter = self._iters[objid]
@@ -2322,7 +2318,7 @@ class ObjectTree(ObjectList):
         :returns: a sequence of descendants objects
         """
         objid = root_instance
-        if not objid in self._iters:
+        if objid not in self._iters:
             raise ValueError("instance %r is not in the list" % root_instance)
 
         root_instance_iter = self._iters[objid]
@@ -2443,8 +2439,8 @@ class ListLabel(Gtk.Box):
                 else:
                     self._label_widget.set_markup(self._label)
             # XXX: Replace 12 with a constant
-            #if position >= 12:
-            #    self._label_widget.set_size_request(position - 12, -1)
+            # if position >= 12:
+            #     self._label_widget.set_size_request(position - 12, -1)
 
         if width != -1:
             self._value_widget.set_size_request(width, -1)
