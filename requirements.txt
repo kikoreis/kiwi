@@ -3,4 +3,4 @@
 # needed to run kiwi, they are processed by pip/easy_install
 #
 
-setuptools >= 0.8
+setuptools >= 61.0
