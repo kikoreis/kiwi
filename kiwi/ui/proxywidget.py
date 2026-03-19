@@ -107,7 +107,7 @@ class ProxyWidgetMixin(object):
             return None
 
         if data_type == 'unicode':
-            data_type = six.text_type
+            data_type = str
 
         # This may convert from string to type,
         # A type object will always be returned
@@ -197,7 +197,7 @@ _error_icon = None
 def _load_error_icon():
     global _error_icon
     if _error_icon is None:
-        value = base64.decodestring(VALIDATION_PNG)
+        value = base64.decodebytes(VALIDATION_PNG)
         _error_icon = pixbuf_from_string(value, 'png')
     return _error_icon
 

@@ -653,7 +653,7 @@ converter.add(_EnumConverter)
 
 def lformat(format, value):
     """Like locale.format but with grouping enabled"""
-    return locale.format(format, value, 1)
+    return locale.format_string(format, value, True)
 
 
 def get_localeconv():
