@@ -1,9 +1,9 @@
 # encoding: utf-8
 import random
 
+from kiwi.ui.comboentry import ComboEntry
 from gi.repository import Gtk
 
-from kiwi.ui.comboentry import ComboEntry
 
 
 class Person:

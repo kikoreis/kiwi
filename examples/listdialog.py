@@ -1,9 +1,9 @@
 # A simple example to demonstrate the ListDialog dialog
 
 
+from kiwi.enums import ListType
 from gi.repository import Gtk
 
-from kiwi.enums import ListType
 from kiwi.ui.listdialog import ListDialog
 from kiwi.ui.objectlist import Column
 from kiwi.ui.widgets.contextmenu import ContextMenu, ContextMenuItem
