@@ -29,7 +29,6 @@
 import base64
 import gettext
 import logging
-import six
 
 from gi.repository import Gtk, GObject, GdkPixbuf
 
