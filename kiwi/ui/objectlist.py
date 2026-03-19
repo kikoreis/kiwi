@@ -29,7 +29,7 @@
 
 import datetime
 import decimal
-import collections
+import collections.abc
 import gettext
 import locale
 import logging
@@ -248,7 +248,7 @@ class Column(GObject.GObject):
 
         format_func = kwargs.get('format_func')
         if format_func:
-            if not isinstance(format_func, collections.Callable):
+            if not isinstance(format_func, collections.abc.Callable):
                 raise TypeError("format_func must be callable")
             if 'format' in kwargs:
                 raise TypeError(
@@ -269,7 +269,7 @@ class Column(GObject.GObject):
 
         sort_func = kwargs.get('sort_func')
         if sort_func:
-            if not isinstance(sort_func, collections.Callable):
+            if not isinstance(sort_func, collections.abc.Callable):
                 raise TypeError("sort_func must be callable")
             self.compare = sort_func
 
@@ -764,7 +764,7 @@ class ColoredColumn(Column):
 
     def __init__(self, attribute, title=None, data_type=None,
                  color=None, data_func=None, use_data_model=False, **kwargs):
-        if not isinstance(data_func, collections.Callable):
+        if not isinstance(data_func, collections.abc.Callable):
             raise TypeError("data func must be callable")
 
         self._color = None
@@ -2476,7 +2476,7 @@ class SummaryLabel(ListLabel):
         the signedness of the object being summed. Returns a bool, ``True``
         means positive, ``False`` means negative.
         """
-        if data_func and not isinstance(data_func, collections.Callable):
+        if data_func and not isinstance(data_func, collections.abc.Callable):
             raise ValueError("data_func must be callable, not %r"
                              % (data_func,))
 
