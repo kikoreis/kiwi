@@ -115,7 +115,7 @@ Launching a tasklet
     @tasklet.task
     def my_task(x):
         [...]
-        raise StopIteration("return value")
+        return "return value"
 
     yield my_task(x=0)
     retval = tasklet.get_event().retval

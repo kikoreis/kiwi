@@ -31,7 +31,7 @@ class TestWaitForSignal(unittest.TestCase):
         def some_task(obj):
             yield tasklet.WaitForSignal(obj, 'my-signal')
             tasklet.get_event()
-            raise StopIteration("return-val")
+            return "return-val"
 
         task = tasklet.run(some_task(obj))
         obj.emit("my-signal", 1)
@@ -44,7 +44,7 @@ class TestWaitForSignal(unittest.TestCase):
         def some_task():
             yield tasklet.WaitForSignal(C, 'my-signal')
             tasklet.get_event()
-            raise StopIteration("return-val")
+            return "return-val"
 
         task = tasklet.run(some_task())
         obj.emit("my-signal", 1)
@@ -63,7 +63,7 @@ class TestWaitForTimeout(unittest.TestCase):
         def some_task():
             yield tasklet.WaitForTimeout(100)
             tasklet.get_event()
-            raise StopIteration("return-val")
+            return "return-val"
 
         mainloop = GObject.MainLoop()
         t1 = self.time()
@@ -86,7 +86,7 @@ class TestMessages(unittest.TestCase):
             yield tasklet.Message('echo-request', dest=remote, value=value)
             yield tasklet.WaitForMessages(accept='echo-reply')
             msg = tasklet.get_event()
-            raise StopIteration(msg.value)
+            return msg.value
 
         def echoer():
             yield tasklet.WaitForMessages(accept='echo-request')
@@ -120,7 +120,7 @@ class TestIO(unittest.TestCase):
             yield tasklet.WaitForIO(chan, GObject.IO_IN)
             tasklet.get_event()
             c = chan.read(1)
-            raise StopIteration(c)
+            return c
 
         def pipe_writer(chan, c):
             assert chan.get_flags() & GObject.IO_FLAG_IS_WRITEABLE
@@ -165,7 +165,7 @@ class TestCallback(unittest.TestCase):
             tasklet.get_event()
             callback.return_value = False
             mainloop.quit()
-            raise StopIteration((callback.args, callback.kwargs))
+            return (callback.args, callback.kwargs)
 
         task = tasklet.run(task_func())
 
@@ -184,13 +184,13 @@ class TestWaitForTasklet(unittest.TestCase):
 
         def quick_task():
             if 1:
-                raise StopIteration(123)
+                return 123
             yield None
 
         def task_waiter():
             yield quick_task()
             taskwait = tasklet.get_event()
-            raise StopIteration(taskwait.retval)
+            return taskwait.retval
 
         mainloop = GObject.MainLoop()
         task = tasklet.run(task_waiter())
