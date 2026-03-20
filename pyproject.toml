@@ -22,7 +22,7 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
-test = ["pytest>=7.0", "mock>=4.0"]
+test = ["pytest>=7.0", "pytest-rerunfailures>=10.0", "mock>=4.0"]
 
 [tool.setuptools.packages.find]
 include = ["kiwi*"]
@@ -31,4 +31,4 @@ exclude = ["tests*", "examples*", "doc*"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
-addopts = "-v"
+addopts = ["-v"]
