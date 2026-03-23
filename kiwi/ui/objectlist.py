@@ -1050,6 +1050,7 @@ class ObjectList(Gtk.Box):
                                self._on_treeview__button_press_event)
         self._treeview.connect_after('row-activated',
                                      self._after_treeview__row_activated)
+        # Deprecated, see https://bugzilla.gnome.org/show_bug.cgi?id=733312
         self._treeview.set_rules_hint(True)
         self._treeview.show()
         self._sw.add(self._treeview)
