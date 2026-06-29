@@ -44,6 +44,7 @@ import locale
 import re
 import sys
 import time
+from functools import partial
 
 from kiwi import ValueUnset
 from kiwi.enums import Alignment
@@ -65,7 +66,7 @@ if sys.platform == 'win32':
 
 __all__ = ['ValidationError', 'lformat', 'converter']
 
-_ = lambda m: gettext.dgettext('kiwi', m)
+_ = partial(gettext.dgettext, 'kiwi')
 
 number = (int, float, decimal.Decimal)
 
@@ -104,7 +105,7 @@ class ConverterRegistry:
             raise TypeError("converter_type must be a BaseConverter subclass")
 
         ctype = converter_type.type
-        if not ctype in self._converters:
+        if ctype not in self._converters:
             raise KeyError(converter_type)
 
         del self._converters[ctype]
@@ -119,8 +120,7 @@ class ConverterRegistry:
             # This is a hack:
             # If we're a subclass of enum, create a dynamic subclass on the
             # fly and register it, it's necessary for enum.from_string to work.
-            if (issubclass(converter_type, enum) and
-                    not converter_type in self._converters):
+            if (issubclass(converter_type, enum) and converter_type not in self._converters):
                 return self.add(
                     type(enum.__class__.__name__ + 'EnumConverter',
                          (_EnumConverter,), dict(type=converter_type)))
@@ -189,6 +189,7 @@ class ConverterRegistry:
         for c in self._converters.values():
             if c.type.__name__ == value:
                 return c.type
+
 
 # Global converter, can be accessed from outside
 converter = ConverterRegistry()
@@ -293,8 +294,8 @@ class _IntConverter(BaseConverter):
         try:
             return self.type(value)
         except ValueError:
-            raise ValidationError(
-                _("%s could not be converted to an integer") % value)
+            raise ValidationError(_("%s could not be converted to an integer") % value)
+
 
 converter.add(_IntConverter)
 
@@ -316,8 +317,8 @@ class _BoolConverter(BaseConverter):
         elif value.upper() in ('FALSE', '0'):
             return False
 
-        return ValidationError(
-            _("'%s' can not be converted to a boolean") % value)
+        return ValidationError(_("'%s' can not be converted to a boolean") % value)
+
 
 converter.add(_BoolConverter)
 
@@ -367,10 +368,10 @@ class _FloatConverter(BaseConverter):
         try:
             retval = float(value)
         except ValueError:
-            raise ValidationError(_("This field requires a number, not %r") %
-                                  value)
+            raise ValidationError(_("This field requires a number, not %r") % value)
 
         return retval
+
 
 converter.add(_FloatConverter)
 
@@ -390,10 +391,10 @@ class _DecimalConverter(_FloatConverter):
         try:
             retval = decimal.Decimal(value)
         except decimal.InvalidOperation:
-            raise ValidationError(_("This field requires a number, not %r") %
-                                  value)
+            raise ValidationError(_("This field requires a number, not %r") % value)
 
         return retval
+
 
 converter.add(_DecimalConverter)
 
@@ -581,6 +582,7 @@ class _TimeConverter(_BaseDateTimeConverter):
         # hour, minute, second
         return datetime.time(*dateinfo[3:6])
 
+
 converter.add(_TimeConverter)
 
 
@@ -598,6 +600,7 @@ class _DateTimeConverter(_BaseDateTimeConverter):
     def from_dateinfo(self, dateinfo):
         # year, month, day, hour, minute, second
         return datetime.datetime(*dateinfo[:6])
+
 
 converter.add(_DateTimeConverter)
 
@@ -617,6 +620,7 @@ class _DateConverter(_BaseDateTimeConverter):
         # year, month, day
         return datetime.date(*dateinfo[:3])
 
+
 converter.add(_DateConverter)
 
 
@@ -627,6 +631,7 @@ class _ObjectConverter(BaseConverter):
     as_string = None
     from_string = None
 
+
 converter.add(_ObjectConverter)
 
 
@@ -636,17 +641,15 @@ class _EnumConverter(BaseConverter):
 
     def as_string(self, value, format=None):
         if not isinstance(value, self.type):
-            raise ValidationError(
-                "value must be an instance of %s, not %r" % (
-                    self.type, value))
+            raise ValidationError("value must be an instance of %s, not %r" % (self.type, value))
         return value.name
 
     def from_string(self, value):
         names = self.type.names
-        if not value in names:
-            raise ValidationError(
-                "Invalid value %s for enum %s" % (value, self.type))
+        if value not in names:
+            raise ValidationError("Invalid value %s for enum %s" % (value, self.type))
         return names[value]
+
 
 converter.add(_EnumConverter)
 

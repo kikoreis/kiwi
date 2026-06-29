@@ -92,10 +92,8 @@ class AttributeForwarder(ClassInittableObject):
         if cls.__bases__ == (ClassInittableObject,):
             return
 
-        if not 'attributes' in ns:
-            raise TypeError(
-                "the class variable attributes needs to be set for %s" % (
-                    cls.__name__))
+        if 'attributes' not in ns:
+            raise TypeError("the class variable attributes needs to be set for %s" % (cls.__name__))
         if "target" in ns['attributes']:
             raise TypeError("'target' is a reserved attribute")
 
@@ -212,6 +210,7 @@ def slicerange(slice, limit):
 
     return range(*slice.indices(limit))
 
+
 _no_deprecation = False
 
 
@@ -268,7 +267,7 @@ class enum(int, metaclass=ClassInittableMetaType):
         Lookup an enum by value
         :param value: the value
         """
-        if not value in cls.values:
+        if value not in cls.values:
             raise ValueError("There is no enum for value %d" % (value,))
         return cls.values[value]
 
@@ -338,20 +337,10 @@ def strip_accents(string):
     :param string: a string, either in str or unicode format
     :returns: the string without accentuantion
     """
-    # FIXME: Probably no one should be using this with bytes.
     if isinstance(string, bytes):
-        # unicode don't need this
+        deprecationwarn("strip_accents called with bytes, should be unicode: %r" % bytes)
         string = string.decode()
-        is_bytes = True
-    else:
-        is_bytes = False
 
     string = unicodedata.normalize('NFKD', string)
     string = string.encode('ASCII', 'ignore')
-
-    # After the encode above, the string would become a byte.
-    # Convert back to string if it was one before to keep the same type
-    if not is_bytes:
-        string = string.decode()
-
-    return string
+    return string.decode()

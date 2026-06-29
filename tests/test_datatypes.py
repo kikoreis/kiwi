@@ -5,7 +5,7 @@ import decimal
 import locale
 import unittest
 
-import mock
+from unittest import mock
 from kiwi.datatypes import (converter, ValidationError, ValueUnset,
                             BaseConverter)
 from kiwi.currency import currency

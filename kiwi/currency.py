@@ -26,12 +26,13 @@
 
 import gettext
 import decimal
+from functools import partial
 
 from kiwi.datatypes import ValidationError, ValueUnset
 from kiwi.datatypes import converter, get_localeconv, filter_locale
 from kiwi.enums import Alignment
 
-_ = lambda m: gettext.dgettext('kiwi', m)
+_ = partial(gettext.dgettext, 'kiwi')
 
 
 class currency(decimal.Decimal):
@@ -69,9 +70,7 @@ class currency(decimal.Decimal):
                   % value)
             value = str(value)
         elif not isinstance(value, (int, decimal.Decimal)):
-            raise TypeError(
-                "cannot convert %r of type %s to a currency" % (
-                    value, type(value)))
+            raise TypeError("cannot convert %r of type %s to a currency" % (value, type(value)))
 
         return decimal.Decimal.__new__(cls, value)
 
@@ -159,6 +158,7 @@ class currency(decimal.Decimal):
     def __repr__(self):
         return '<currency %s>' % self.format()
 
+
 _DecimalConverter = type(converter.get_converter(decimal.Decimal))
 
 
@@ -198,6 +198,7 @@ class _CurrencyConverter(_DecimalConverter):
         except (ValueError, decimal.InvalidOperation):
             raise ValidationError(
                 _("%s can not be converted to a currency") % value)
+
 
 converter.add(_CurrencyConverter)
 

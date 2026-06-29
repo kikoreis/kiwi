@@ -446,6 +446,7 @@ class ProxyComboBox(Gtk.ComboBox, ProxyWidgetMixin):
         """
         return self._helper.get_selected()
 
+
 GObject.type_register(ProxyComboBox)
 
 
@@ -524,10 +525,11 @@ class ProxyComboEntry(ComboEntry, ValidatableProxyWidgetMixin):
                 self.emit('validation-changed', True)
             self.select(data)
 
-    #FIXME: This is really an ugly workaround. But for some dark and
-    #       misterious force, we need to override this method because
-    #       the method in superclass fails to retrieve the selected data.
+    # FIXME: This is really an ugly workaround. But for some dark and
+    #        misterious force, we need to override this method because
+    #        the method in superclass fails to retrieve the selected data.
     def get_selected_data(self):
         return self.entry.read()
+
 
 GObject.type_register(ProxyComboEntry)

@@ -25,8 +25,7 @@ from kiwi import kiwi_version
 from kiwi.dist import setup, listfiles, listpackages
 
 
-pixmaps = listfiles('data', 'kiwiwidgets',
-                    'glade-plugin', 'resources', 'kiwiwidgets', '*.png')
+pixmaps = listfiles('data', 'kiwiwidgets', 'glade-plugin', 'resources', 'kiwiwidgets', '*.png')
 
 # When uploading to pypi or building a wheel or an egg
 if 'upload' in sys.argv or 'bdist_wheel' in sys.argv or 'bdist_egg' in sys.argv:
@@ -56,16 +55,11 @@ setup(name=name,
           ('$libdir/glade3/modules', ['data/kiwiwidgets/kiwiwidgets.py']),
           ('share/glade3/pixmaps', pixmaps),
           # Documentation
-          ('share/doc/kiwi',
-           ('AUTHORS', 'NEWS', 'README')),
-          ('share/doc/kiwi/howto',
-           listfiles('doc/howto/', '*')),
-          ('share/doc/kiwi/api',
-           listfiles('doc/api/', '*')),
+          ('share/doc/kiwi', ('AUTHORS', 'NEWS', 'README')),
+          ('share/doc/kiwi/howto', listfiles('doc/howto/', '*')),
+          ('share/doc/kiwi/api', listfiles('doc/api/', '*')),
       ],
-      scripts=['bin/kiwi-i18n',
-               'bin/kiwi-ui-test'],
+      scripts=['bin/kiwi-i18n', 'bin/kiwi-ui-test'],
       packages=listpackages('kiwi'),
-      test_requires=['mock'],
       install_requires=install_requires,
       )
