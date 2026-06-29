@@ -87,12 +87,12 @@ class StripAccentsTest(unittest.TestCase):
     def testStripAccents(self):
         for string, string_without_accentuation in [
             # bytes
-            ('áâãäåāăąàÁÂÃÄÅĀĂĄÀ'.encode(), b'aaaaaaaaaAAAAAAAAA'),
-            ('èééêëēĕėęěĒĔĖĘĚ'.encode(), b'eeeeeeeeeeEEEEE'),
-            ('ìíîïìĩīĭÌÍÎÏÌĨĪĬ'.encode(), b'iiiiiiiiIIIIIIII'),
-            ('óôõöōŏőÒÓÔÕÖŌŎŐ'.encode(), b'oooooooOOOOOOOO'),
-            ('ùúûüũūŭůÙÚÛÜŨŪŬŮ'.encode(), b'uuuuuuuuUUUUUUUU'),
-            ('çÇ'.encode(), b'cC'),
+            ('áâãäåāăąàÁÂÃÄÅĀĂĄÀ'.encode(), 'aaaaaaaaaAAAAAAAAA'),
+            ('èééêëēĕėęěĒĔĖĘĚ'.encode(), 'eeeeeeeeeeEEEEE'),
+            ('ìíîïìĩīĭÌÍÎÏÌĨĪĬ'.encode(), 'iiiiiiiiIIIIIIII'),
+            ('óôõöōŏőÒÓÔÕÖŌŎŐ'.encode(), 'oooooooOOOOOOOO'),
+            ('ùúûüũūŭůÙÚÛÜŨŪŬŮ'.encode(), 'uuuuuuuuUUUUUUUU'),
+            ('çÇ'.encode(), 'cC'),
             # strings
             ('áâãäåāăąàÁÂÃÄÅĀĂĄÀ', 'aaaaaaaaaAAAAAAAAA'),
             ('èééêëēĕėęěĒĔĖĘĚ', 'eeeeeeeeeeEEEEE'),

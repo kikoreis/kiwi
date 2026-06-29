@@ -258,6 +258,8 @@ class enum(int, metaclass=ClassInittableMetaType):
         cls.values = {}  # value -> enum
 
         for key, value in ns.items():
+            if key.startswith('_'):
+                continue
             if isinstance(value, int):
                 cls(value, key)
 

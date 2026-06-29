@@ -314,9 +314,9 @@ class MethodTest(unittest.TestCase):
                                 [Settable(name='first')])
 
     def testNonZero(self):
-        self.assertEqual(self.klist.__nonzero__(), True)
+        self.assertEqual(self.klist.__bool__(), True)
         self.klist.remove(self.klist[0])
-        self.assertEqual(self.klist.__nonzero__(), True)
+        self.assertEqual(self.klist.__bool__(), True)
         if not self.klist:
             raise AssertionError
 
