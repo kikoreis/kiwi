@@ -3,6 +3,7 @@ tags
 TAGS
 locale
 dist/
+build/
 kiwi.egg-info/
 .coverage
 .pytest_cache/
