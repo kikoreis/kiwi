@@ -175,9 +175,12 @@ class KiwiEntry(Gtk.Entry):
             self.delete_text(0, -1)
             self.insert_text(text, 0)
         else:
-            # XXX Currently raises a warning; see
-            # https://bugzilla.gnome.org/show_bug.cgi?id=708676#c4
-            Gtk.Entry.set_text(self, text)
+            # See https://gitlab.gnome.org/GNOME/pygobject/-/work_items/12 
+            #
+            # Set text via the buffer to avoid a spurious
+            # g_value_get_int warning in PyGObject's
+            # Gtk.Entry.set_text / Gtk.Editable.insert_text overrides.
+            self.get_buffer().set_text(text, -1)
 
         if isinstance(completion, KiwiEntryCompletion):
             self.handler_unblock(completion.changed_id)
