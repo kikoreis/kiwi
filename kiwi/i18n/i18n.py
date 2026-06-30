@@ -22,13 +22,12 @@
 """Internationalization utilities. Requires intltool and gettext"""
 
 
-from distutils.dep_util import newer
 from distutils.filelist import FileList, findall
 from optparse import OptionParser
 import os
 from shutil import copyfile
 
-from kiwi.dist import listfiles
+from kiwi.dist import listfiles, newer
 
 # This is a template, used to generate a list of translatable file
 # which intltool can understand.

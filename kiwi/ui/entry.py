@@ -102,6 +102,7 @@ class KiwiEntry(Gtk.Entry):
 
     def __init__(self, **kwargs):
         self._completion = None
+        self._font_provider = None
 
         super(KiwiEntry, self).__init__(**kwargs)
 
@@ -185,6 +186,15 @@ class KiwiEntry(Gtk.Entry):
         if isinstance(completion, KiwiEntryCompletion):
             self.handler_unblock(completion.changed_id)
 
+    def _set_font(self, family):
+        if self._font_provider is None:
+            self._font_provider = Gtk.CssProvider()
+            ctx = self.get_style_context()
+            ctx.add_provider(self._font_provider,
+                             Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+        css = "entry { font-family: %s; }" % family
+        self._font_provider.load_from_data(css.encode())
+
     def set_mask(self, mask):
         """
         Sets the mask of the Entry.
@@ -206,7 +216,7 @@ class KiwiEntry(Gtk.Entry):
         :param mask: the mask to set
         """
         if not mask:
-            self.modify_font(Pango.FontDescription("sans"))
+            self._set_font("sans")
             self._mask = mask
             return
 
@@ -219,7 +229,7 @@ class KiwiEntry(Gtk.Entry):
             else:
                 self._mask_validators.append(c)
 
-        self.modify_font(Pango.FontDescription("monospace"))
+        self._set_font("monospace")
 
         self._really_delete_text(0, -1)
         self._mask = mask
@@ -319,13 +329,13 @@ class KiwiEntry(Gtk.Entry):
     def _really_delete_text(self, start, end):
         # A variant of delete_text() that never is blocked by us
         self._block_delete = True
-        self.delete_text(start, end)
+        self.get_buffer().delete_text(start, end - start)
         self._block_delete = False
 
     def _really_insert_text(self, text, position):
         # A variant of insert_text() that never is blocked by us
         self._block_insert = True
-        self.insert_text(text, position)
+        self.get_buffer().insert_text(position, text, len(text))
         self._block_insert = False
 
     def _insert_char_at_position(self, pos, char):

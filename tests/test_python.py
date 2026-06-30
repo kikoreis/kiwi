@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import unittest
+import warnings
 
 from kiwi.python import AttributeForwarder, slicerange, enum, strip_accents
 
@@ -97,12 +98,14 @@ class StripAccentsTest(unittest.TestCase):
             ('áâãäåāăąàÁÂÃÄÅĀĂĄÀ', 'aaaaaaaaaAAAAAAAAA'),
             ('èééêëēĕėęěĒĔĖĘĚ', 'eeeeeeeeeeEEEEE'),
             ('ìíîïìĩīĭÌÍÎÏÌĨĪĬ', 'iiiiiiiiIIIIIIII'),
-            ('óôõöōŏőÒÓÔÕÖŌŎŐ', 'oooooooOOOOOOOO'),
-            ('ùúûüũūŭůÙÚÛÜŨŪŬŮ', 'uuuuuuuuUUUUUUUU'),
+            ('óôõöōŏőÒÓÔÕÖŌŎŐ'.encode(), 'oooooooOOOOOOOO'),
+            ('ùúûüũūŭůÙÚÛÜŨŪŬŮ'.encode(), 'uuuuuuuuUUUUUUUU'),
             ('çÇ', 'cC'),
         ]:
-            self.assertEqual(strip_accents(string),
-                             string_without_accentuation)
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", DeprecationWarning)
+                self.assertEqual(strip_accents(string),
+                                 string_without_accentuation)
 
 
 if __name__ == '__main__':

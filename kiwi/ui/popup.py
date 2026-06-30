@@ -182,8 +182,12 @@ class PopupWindow(Gtk.Window):
         self.add(frame)
         frame.show()
 
-        alignment = Gtk.Alignment.new(0.5, 0.5, 1.0, 1.0)
-        alignment.set_padding(*self.FRAME_PADDING)
+        alignment = Gtk.Box()
+        top, bottom, left, right = self.FRAME_PADDING
+        alignment.set_margin_top(top)
+        alignment.set_margin_bottom(bottom)
+        alignment.set_margin_start(left)
+        alignment.set_margin_end(right)
         frame.add(alignment)
         alignment.show()
 

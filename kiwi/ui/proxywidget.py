@@ -387,7 +387,8 @@ class ValidatableProxyWidgetMixin(ProxyWidgetMixin):
         self._valid = state
 
     def _draw_stock_icon(self, stock_id):
-        icon = self.render_icon(stock_id, Gtk.IconSize.MENU)
+        theme = Gtk.IconTheme.get_default()
+        icon = theme.load_icon(stock_id, VALIDATION_ICON_WIDTH, 0)
         self._set_pixbuf(icon)
         self.queue_draw()
 

@@ -60,8 +60,8 @@ class ContextMenuItem(Gtk.ImageMenuItem):
         self.add(lbl)
 
         image = Gtk.Image()
-        image.set_from_stock(stock, Gtk.IconSize.MENU)
-        self.set_image(image)
+        image.set_from_icon_name(stock, Gtk.IconSize.MENU)
+        self.set_property('image', image)
 
 
 GObject.type_register(ContextMenuItem)

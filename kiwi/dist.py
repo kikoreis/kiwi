@@ -26,7 +26,6 @@
 from distutils.command.clean import clean
 from distutils.command.install_data import install_data
 from distutils.command.install_lib import install_lib
-from distutils.dep_util import newer
 from distutils.log import info, warn
 from distutils.sysconfig import get_python_lib
 import errno
@@ -37,6 +36,12 @@ import subprocess
 import sys
 
 from setuptools import setup as DS_setup
+
+
+def newer(source, target):
+    if not os.path.exists(target):
+        return True
+    return os.path.getmtime(source) > os.path.getmtime(target)
 
 
 class _VariableExtender:

@@ -62,7 +62,11 @@ class HIGAlertDialog(Gtk.Dialog):
             raise TypeError(
                 "buttons be one of: %s", ', '.join(_BUTTON_TYPES.keys()))
 
-        super(HIGAlertDialog, self).__init__('', parent, flags)
+        modal = bool(flags & Gtk.DialogFlags.MODAL)
+        destroy = bool(flags & Gtk.DialogFlags.DESTROY_WITH_PARENT)
+        super(HIGAlertDialog, self).__init__(
+            title='', transient_for=parent, modal=modal,
+            destroy_with_parent=destroy)
 
         self.set_deletable(False)
         self.set_border_width(5)
@@ -80,16 +84,18 @@ class HIGAlertDialog(Gtk.Dialog):
         self._primary_label = Gtk.Label()
         self._secondary_label = Gtk.Label()
         self._details_label = Gtk.Label()
-        self._image = Gtk.Image.new_from_stock(_IMAGE_TYPES[type],
-                                               Gtk.IconSize.DIALOG)
-        self._image.set_alignment(0.5, 0.0)
+        self._image = Gtk.Image.new_from_icon_name(_IMAGE_TYPES[type],
+                                                    Gtk.IconSize.DIALOG)
+        self._image.set_halign(Gtk.Align.CENTER)
+        self._image.set_valign(Gtk.Align.START)
 
         self._primary_label.set_use_markup(True)
         for label in (self._primary_label, self._secondary_label,
                       self._details_label):
             label.set_line_wrap(True)
             label.set_selectable(True)
-            label.set_alignment(0.0, 0.5)
+            label.set_xalign(0.0)
+            label.set_yalign(0.5)
             label.set_max_width_chars(80)
 
         hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
@@ -104,7 +110,7 @@ class HIGAlertDialog(Gtk.Dialog):
 
         self._expander = Gtk.Expander.new_with_mnemonic(
             _("Show more _details"))
-        self._expander.set_spacing(6)
+        self._details_label.set_margin_top(6)
         self._expander.add(self._details_label)
         vbox.pack_start(self._expander, False, False, 0)
         self.get_content_area().pack_start(hbox, True, True, 0)
@@ -148,11 +154,16 @@ class BaseDialog(Gtk.Dialog):
             flags &= (Gtk.DialogFlags.MODAL |
                       Gtk.DialogFlags.DESTROY_WITH_PARENT)
 
+        modal = bool(flags & Gtk.DialogFlags.MODAL)
+        destroy = bool(flags & Gtk.DialogFlags.DESTROY_WITH_PARENT)
         super(BaseDialog, self).__init__(
-            title=title, parent=parent, flags=flags, buttons=buttons)
+            title=title, transient_for=parent, modal=modal,
+            destroy_with_parent=destroy)
+        if buttons:
+            for text, response in buttons:
+                self.add_button(text, response)
 
         self.set_border_width(6)
-        self.set_has_separator(False)
         self.vbox.set_spacing(6)
 
 
