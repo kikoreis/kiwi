@@ -163,7 +163,10 @@ class _ComboEntryPopup(PopupWindow):
             # XXX: private member of comboentry
             self._comboentry._button.grab_focus()
             return True
-        return False
+        # Delegate to base so Return/KP_Enter/KP_Space -> confirm()
+        # and Escape/Alt+Up -> popdown. Without this Enter did
+        # nothing (the override shadowed the base confirm path).
+        return super().handle_key_press_event(event)
 
     # Callbacks
 

@@ -106,16 +106,23 @@ class PopupWindow(Gtk.Window):
             return False
 
         toplevel = self.attached_widget.get_toplevel().get_toplevel()
-        if (isinstance(toplevel, (Gtk.Window, Gtk.Dialog)) and
-                toplevel.get_group()):
-            toplevel.get_group().add_window(self)
+        if isinstance(toplevel, (Gtk.Window, Gtk.Dialog)):
+            # Setting a transient parent lets the WM place the
+            # POPUP window (fixes "temporary window without parent"
+            # warning) and keeps it above the parent.
+            self.set_transient_for(toplevel)
+            if toplevel.get_group():
+                toplevel.get_group().add_window(self)
 
-        self.show_all()
-        self.adjust_position()
-
-        if self.GRAB_WINDOW and not self._popup_grab_window():
-            self.hide()
-            return False
+        if self.GRAB_WINDOW:
+            # seat.grab() with a prepare_func atomically shows the
+            # window and activates the grab, avoiding the
+            # "already mapped at the time of grabbing" warning.
+            if not self._popup_grab_window():
+                return False
+        else:
+            self.show_all()
+            self.adjust_position()
 
         if self.GRAB_ADD:
             self.grab_add()
@@ -132,6 +139,9 @@ class PopupWindow(Gtk.Window):
 
         if self.GRAB_ADD:
             self.grab_remove()
+
+        if self.GRAB_WINDOW:
+            self._popup_ungrab_window()
 
         self.hide()
         self.attached_widget.grab_focus()
@@ -193,28 +203,43 @@ class PopupWindow(Gtk.Window):
 
         self.main_widget = self.get_main_widget()
         self.main_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        self.main_box.add(self.main_widget)
-        alignment.add(self.main_box)
+        self.main_box.pack_start(
+            self.main_widget, expand=True, fill=True, padding=0)
+        alignment.pack_start(
+            self.main_box, expand=True, fill=True, padding=0)
 
         self.set_resizable(False)
         self.set_screen(self.attached_widget.get_screen())
 
     def _popup_grab_window(self):
-        activate_time = 0
+        # seat.grab() requires the GdkWindow to exist; realize() is
+        # enough (no show/map). The prepare_func below will show the
+        # window atomically as the grab is activated.
+        self.realize()
         window = self.get_window()
-        grab_status = Gdk.pointer_grab(window, True,
-                                       (Gdk.EventMask.BUTTON_PRESS_MASK |
-                                        Gdk.EventMask.BUTTON_RELEASE_MASK |
-                                        Gdk.EventMask.POINTER_MOTION_MASK),
-                                       None, None, activate_time)
-        if grab_status == Gdk.GrabStatus.SUCCESS:
-            if Gdk.keyboard_grab(window, True, activate_time) == 0:
-                return True
-            else:
-                window.get_display().pointer_ungrab(activate_time)
-                return False
+        seat = window.get_display().get_default_seat()
+        capabilities = (Gdk.SeatCapabilities.POINTER |
+                        Gdk.SeatCapabilities.KEYBOARD)
+        # owner_events=True is essential on Wayland: with False the
+        # grab traps pointer events at the popup GdkWindow and child
+        # widgets (e.g. the treeview) never get button-release, so
+        # rows aren't clickable. Matches GtkComboBox's
+        # popup_grab_on_window (owner_events=TRUE).
+        status = seat.grab(window, capabilities, True, None, None,
+                           self._on__grab_prepare, None)
+        return status == Gdk.GrabStatus.SUCCESS
 
-        return False
+    def _on__grab_prepare(self, seat, window, user_data):
+        # Called by seat.grab() so the window becomes visible
+        # atomically with the grab — no "already mapped" warning.
+        self.show_all()
+        self.adjust_position()
+
+    def _popup_ungrab_window(self):
+        window = self.get_window()
+        if window is not None:
+            seat = window.get_display().get_default_seat()
+            seat.ungrab()
 
     def _get_position(self):
         widget = self.get_widget_for_popup()

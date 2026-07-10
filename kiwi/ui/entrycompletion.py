@@ -216,25 +216,19 @@ class KiwiEntryCompletion(Gtk.EntryCompletion):
         return False
 
     def _popup_grab_window(self):
-        activate_time = 0
+        # The entry is already visible, so no prepare_func is needed.
         window = self._entry.get_window()
-        if Gdk.pointer_grab(window, True,
-                            (Gdk.EventMask.BUTTON_PRESS_MASK |
-                             Gdk.EventMask.BUTTON_RELEASE_MASK |
-                             Gdk.EventMask.POINTER_MOTION_MASK),
-                            None, None, activate_time) == 0:
-            if Gdk.keyboard_grab(window, True, activate_time) == 0:
-                return True
-            else:
-                window.get_display().pointer_ungrab(activate_time)
-                return False
-        return False
+        seat = window.get_display().get_default_seat()
+        capabilities = (Gdk.SeatCapabilities.POINTER |
+                        Gdk.SeatCapabilities.KEYBOARD)
+        status = seat.grab(window, capabilities, True, None, None,
+                           None, None)
+        return status == Gdk.GrabStatus.SUCCESS
 
     def _popup_ungrab_window(self):
-        activate_time = 0
-        display = self._entry.get_window().get_display()
-        display.pointer_ungrab(activate_time)
-        display.keyboard_ungrab(activate_time)
+        window = self._entry.get_window()
+        seat = window.get_display().get_default_seat()
+        seat.ungrab()
 
     # Public API
     def complete(self):
